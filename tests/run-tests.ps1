@@ -35,13 +35,60 @@ Assert-Equal (Get-SendDecision $reached $null 1000) 'limit-reached' 'Service lim
 Assert-Equal (Get-SendDecision (Make-Bucket) @{ blockUntil = 2000 } 1000) 'already-attempted' 'Guard waits'
 Assert-Equal (Get-SendDecision (Make-Bucket) @{ blockUntil = 1000 } 1000) 'send' 'Expired guard releases'
 
+# A native fixture removes Python launcher/alias differences from PowerShell tests.
+$null = [IO.Directory]::CreateDirectory($testRoot)
+$fakeExecutable = Join-Path $testRoot 'fake-codex.exe'
+$fixtureSource = @'
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Web.Script.Serialization;
+public static class FakeCodex {
+    public static int Main(string[] args) {
+        Console.OutputEncoding = new UTF8Encoding(false);
+        Console.InputEncoding = new UTF8Encoding(false);
+        if (args.Length > 0 && args[0] == "app-server") {
+            JavaScriptSerializer json = new JavaScriptSerializer();
+            string line;
+            while ((line = Console.ReadLine()) != null) {
+                Dictionary<string, object> request = json.Deserialize<Dictionary<string, object>>(line);
+                string method = (string)request["method"];
+                if (method == "initialized") continue;
+                Console.WriteLine(json.Serialize(new { method = "test/notification", @params = new { } }));
+                object result;
+                if (method == "initialize") result = new { userAgent = "fixture" };
+                else if (method == "account/read") result = new { account = new { type = "chatgpt", email = "fixture@example.invalid" } };
+                else if (method == "account/rateLimits/read") result = new {
+                    rateLimitsByLimitId = new Dictionary<string, object> {
+                        { "other", new { primary = new { usedPercent = 0, windowDurationMins = 60 } } },
+                        { "codex", new { primary = new { usedPercent = 0, windowDurationMins = 300, resetsAt = 20000 }, secondary = new { usedPercent = 20 } } }
+                    }
+                };
+                else return 2;
+                Console.WriteLine(json.Serialize(new { id = request["id"], result = result }));
+            }
+            return 0;
+        }
+        if (args.Contains("--help")) {
+            Console.WriteLine("--ignore-user-config --ephemeral"); return 0;
+        }
+        if (!args.Contains("forced_login_method=chatgpt") ||
+            !args.Contains("read-only") || !args.Contains("--ignore-user-config")) return 2;
+        string input = Console.ReadLine();
+        string hello = "\u4f60\u597d";
+        if (input == null || !input.Contains(hello)) return 3;
+        Console.WriteLine(hello); return 0;
+    }
+}
+'@
+Add-Type -TypeDefinition $fixtureSource -Language CSharp -ReferencedAssemblies 'System.Web.Extensions','System.Core' -OutputAssembly $fakeExecutable -OutputType ConsoleApplication
+
 # Real process I/O, with a local fake app server. It sends a notification before
 # matching RPC replies and includes an unrelated usage bucket before Codex.
 $originalProcess = (Get-Item Function:Start-CodexProcess).ScriptBlock
-$fake = Join-Path $PSScriptRoot 'fixtures\fake-app-server.py'
-$python = (Get-Command python.exe).Source
 function Start-CodexProcess([string]$Executable, [string[]]$Arguments) {
-    & $originalProcess $python @('-u', $fake)
+    & $originalProcess $fakeExecutable $Arguments
 }
 $snapshot = Get-AccountSnapshot 'unused'
 Assert-Equal $snapshot.Bucket.primary.windowDurationMins 300 'Select Codex bucket'
@@ -83,32 +130,9 @@ function Get-AccountSnapshot([string]$Executable) { throw 'Simulated offline que
 try { Invoke-Monitor } catch { }
 Assert-Equal (Test-Path -LiteralPath (Join-Path $script:Root 'state-unit-test-account.json')) $false 'Offline quota read writes no guard'
 
-# Exercise the real greeting subprocess implementation using a tiny native fixture.
+# Exercise the real greeting subprocess implementation using the native fixture.
 # This checks quoting, UTF-8 stdin, required flags, and exact reply handling.
 Set-Item Function:Start-CodexProcess $originalProcess
-$fakeExecutable = Join-Path $script:Root 'fake-codex.exe'
-$null = [IO.Directory]::CreateDirectory($script:Root)
-$fixtureSource = @'
-using System;
-using System.Linq;
-using System.Text;
-public static class FakeCodex {
-    public static int Main(string[] args) {
-        Console.OutputEncoding = new UTF8Encoding(false);
-        Console.InputEncoding = new UTF8Encoding(false);
-        if (args.Contains("--help")) {
-            Console.WriteLine("--ignore-user-config --ephemeral"); return 0;
-        }
-        if (!args.Contains("forced_login_method=chatgpt") ||
-            !args.Contains("read-only") || !args.Contains("--ignore-user-config")) return 2;
-        string input = Console.ReadLine();
-        string hello = "\u4f60\u597d";
-        if (input == null || !input.Contains(hello)) return 3;
-        Console.WriteLine(hello); return 0;
-    }
-}
-'@
-Add-Type -TypeDefinition $fixtureSource -Language CSharp -OutputAssembly $fakeExecutable -OutputType ConsoleApplication
 & $originalHello $fakeExecutable
 Assert-Equal $true $true 'Real greeting subprocess with native fixture'
 

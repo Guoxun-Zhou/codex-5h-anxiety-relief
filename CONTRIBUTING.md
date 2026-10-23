@@ -6,7 +6,7 @@ Please preserve model-free quota reads, write-before-send guards, and skipping o
 
 ## Development
 
-Runtime: Python 3.10+ standard library, or Windows PowerShell 5.1 for the retained Windows implementation. Python is needed for the development tests, including the PowerShell test fixture.
+Runtime: Python 3.10+ standard library, or Windows PowerShell 5.1 for the retained Windows implementation. Python is needed for the cross-platform test suite. PowerShell checks compile their own local .NET fixture and do not require Python.
 
 ```bash
 python3 -m unittest discover -s tests -p 'test_*.py' -v

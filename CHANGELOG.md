@@ -9,9 +9,11 @@
 - 补齐中英文首页、使用指南、排错、发布指南及 MIT 许可证。
 - 添加离线回归测试、GitHub CI、显式发布文件清单及双击上传入口。
 - 修正 Windows PowerShell 5.1 将首次发布时的“仓库不存在”检查视为致命错误的问题。
+- PowerShell 回归改用原生 .NET 模拟进程，避免 CI 环境的 Python 启动器差异。
 
 - Initial public project packaging with the requested Chinese title.
 - Retained the Windows PowerShell implementation reported working by a user.
 - Added standard-library Python, Linux systemd/cron installers, and Docker/NAS deployment.
 - Added bilingual docs, MIT license, offline tests, CI, explicit release manifest, and a Windows publication helper.
 - Fixed expected negative GitHub probes terminating the initial publisher under Windows PowerShell 5.1.
+- Replaced the PowerShell RPC fixture with a native .NET process to avoid CI Python-launcher differences.
