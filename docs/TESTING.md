@@ -2,6 +2,16 @@
 
 Recorded on 2026-10-23. This distinguishes implemented support from actual end-to-end deployment coverage.
 
+## Verified GitHub CI
+
+[All six jobs passed](https://github.com/Guoxun-Zhou/codex-5h-anxiety-relief/actions/runs/39898311661) for runtime commit `659aa79698a907308fc59ecbbb1285d9bc475eae`:
+
+- Windows PowerShell: 28 offline checks, including UTF-8 BOM regression coverage.
+- Python 3.10 and 3.12 on both Windows and Ubuntu.
+- Linux x64 Docker image build, Compose validation, and unauthenticated entry-point checks.
+
+The GitHub publication helper was also used successfully to create this public repository and upload its 39 manifest-listed files, after fixing expected negative probes on Windows PowerShell 5.1.
+
 ## Local checks
 
 | Component | Validation performed |
@@ -19,16 +29,15 @@ An earlier Windows deployment was reported successful by the user. This release 
 
 ## Coverage limits
 
-- Docker Engine was not running in the preparation environment. Compose was validated, but a local image build and container authentication were not completed.
+- Docker Engine was not running locally. The image build and unauthenticated startup checks subsequently passed in GitHub CI on Linux x64. Real-account container authentication was not performed in CI.
 - No real NAS device or ARM64 host was available for end-to-end validation.
 - Linux scheduler behavior was tested with isolated fake commands; no real cron entry or systemd user service was installed during preparation.
-- GitHub CI is supplied for the published repository, including a Docker build. It has not run on GitHub before publication.
-- The publication helper's manifest-only mode is checked locally. A real remote repository is not created during preparation.
+- CI checks use fixtures and do not prove real NAS authentication, persistent login, or unattended operation on every host.
 
 The Dockerfile pins `@openai/codex` to `0.163.0`. The package's Linux x64 and arm64 variants were confirmed in registry metadata; this is not a substitute for running an actual image on each architecture. You can select another verified CLI version using `CODEX_VERSION`.
 
 ## 中文说明
 
-已完成 Windows／Ubuntu 离线回归、Linux 模拟调度安装与卸载、Compose 配置及发布文件检查。测试不会调用真实模型、安装真实任务或创建 GitHub 远端仓库。
+已完成 Windows／Ubuntu 离线回归、Linux 模拟调度安装与卸载、Compose 配置及发布文件检查。GitHub 六项 CI 已全部通过，包括 Docker x64 镜像构建与无登录启动检查。发布助手已成功创建本公开仓库并上传 39 个清单文件。测试本身不会调用真实模型或安装真实定时任务。
 
-Windows 原版已有用户反馈实际测试成功。Docker、NAS、ARM64 和 GitHub CI 的真实运行状态不能仅凭配置检查认定已经通过，首次部署请查看日志确认。此文档保留验证边界，避免把“代码支持”写成“所有设备都已实测”。
+Windows 原版已有用户反馈实际测试成功。NAS、ARM64、容器真实账号登录和长期无人值守运行仍需设备实测，首次部署请查看日志确认。此文档保留验证边界，避免把“代码支持”写成“所有设备都已实测”。

@@ -7,6 +7,8 @@
 
 [简体中文](README.md) · [Usage guide](docs/USAGE.en.md) · [Troubleshooting](docs/TROUBLESHOOTING.en.md) · [Publish to GitHub](docs/PUBLISH.en.md)
 
+[![CI](https://github.com/Guoxun-Zhou/codex-5h-anxiety-relief/actions/workflows/ci.yml/badge.svg)](https://github.com/Guoxun-Zhou/codex-5h-anxiety-relief/actions/workflows/ci.yml)
+
 Windows · Linux · Server · Docker / NAS · Python standard library · MIT
 
 A small tool that sends a single “你好” through Codex CLI when the five-hour allowance reports 100% remaining.

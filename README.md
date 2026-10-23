@@ -5,6 +5,8 @@
 
 [English](README.en.md) · [详细使用说明](docs/USAGE.zh-CN.md) · [故障排查](docs/TROUBLESHOOTING.zh-CN.md) · [如何上传到 GitHub](docs/PUBLISH.zh-CN.md)
 
+[![CI](https://github.com/Guoxun-Zhou/codex-5h-anxiety-relief/actions/workflows/ci.yml/badge.svg)](https://github.com/Guoxun-Zhou/codex-5h-anxiety-relief/actions/workflows/ci.yml)
+
 Windows · Linux · Server · Docker / NAS · Python 标准库 · MIT
 
 一个在 Codex 五小时额度恢复为 100% 时，通过 Codex CLI 自动发送一次“你好”的小工具。

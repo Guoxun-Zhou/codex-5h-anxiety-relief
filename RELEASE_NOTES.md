@@ -6,7 +6,9 @@
 
 包含 Windows 双击安装、Linux systemd／cron、Docker／NAS 部署、中英文使用与排错指南、测试、MIT 许可证及首次 GitHub 发布助手。只建议每个账号部署一个监控实例。
 
-本地已完成 Windows PowerShell 回归、Windows 与 Ubuntu Python 离线测试、Linux 模拟调度安装测试和 Compose 配置校验。Docker 镜像构建与真实 NAS 登录仍需要在实际运行环境或 CI 中确认。官方接口与计时策略可能变化，详见文档。
+Windows PowerShell 回归、Windows／Ubuntu 的 Python 3.10 与 3.12、Docker x64 构建等六项 GitHub CI 已全部通过；也修复了 Windows UTF-8 环境的 BOM 兼容问题。真实 NAS 登录、ARM64 和长期无人值守部署仍需要设备确认。官方接口与计时策略可能变化，详见文档。
+
+[查看通过的 CI 记录](https://github.com/Guoxun-Zhou/codex-5h-anxiety-relief/actions/runs/39898311661)
 
 ## English
 
@@ -16,4 +18,6 @@ Send a single “你好” through Codex CLI when the five-hour meter reports 10
 
 Includes Windows, Linux systemd/cron, Docker/NAS deployment, bilingual documentation, offline tests, the MIT license, and an initial GitHub publishing helper. Use one monitor per account.
 
-Local validation covers Windows PowerShell, Python on Windows and Ubuntu, isolated Linux scheduler installation tests, and Compose configuration. Actual Docker builds and NAS authentication remain to be verified in the deployment environment or CI. See the documentation for service-version and timer-policy limits.
+All six GitHub CI jobs passed: Windows PowerShell, Python 3.10/3.12 on Windows and Ubuntu, and the Linux x64 Docker build. Windows UTF-8 BOM handling is covered by regression checks. Real NAS authentication, ARM64, and long-running unattended deployments still require device validation. See the documentation for service-version and timer-policy limits.
+
+[Passing CI record](https://github.com/Guoxun-Zhou/codex-5h-anxiety-relief/actions/runs/39898311661)
