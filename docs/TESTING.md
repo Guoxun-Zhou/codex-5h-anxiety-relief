@@ -6,7 +6,7 @@ Recorded on 2026-10-23. This distinguishes implemented support from actual end-t
 
 | Component | Validation performed |
 |---|---|
-| Original Windows PowerShell implementation | 27 offline checks, including guards, UTF-8 greeting process fixture, real stdio fixture, and scheduler objects without registration |
+| Windows PowerShell implementation | 28 offline checks, including guards, BOM-free UTF-8 subprocess input, caller-encoding restoration, real stdio fixture, and scheduler objects without registration |
 | Python implementation on Windows | Offline unit tests, stdio protocol fixture, guard persistence, state corruption, concurrency lock, and greeting argument checks |
 | Python implementation on Ubuntu / WSL | The same offline suite plus isolated systemd and cron installer/update/uninstaller tests |
 | Linux shell scripts | Bash syntax check; generated units and cron entries checked using fake schedulers |
@@ -15,7 +15,7 @@ Recorded on 2026-10-23. This distinguishes implemented support from actual end-t
 
 Tests do not authenticate, send a real greeting, buy credits, redeem resets, or install real scheduled jobs. Fixture accounts use `example.invalid`; any “Greeting completed” output during tests refers to a local fake process.
 
-An earlier Windows deployment was reported successful by the user. The Windows runtime in this release is retained from that working package. That report is not a guarantee for every account, CLI version, server policy, or NAS.
+An earlier Windows deployment was reported successful by the user. This release builds on that implementation and adds the UTF-8 BOM compatibility fix exposed by hosted Windows CI. That report is not a guarantee for every account, CLI version, server policy, or NAS.
 
 ## Coverage limits
 

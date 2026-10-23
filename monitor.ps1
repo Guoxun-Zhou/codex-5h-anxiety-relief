@@ -77,11 +77,16 @@ function Start-CodexProcess([string]$Executable, [string[]]$Arguments) {
     $info.StandardErrorEncoding = $script:Utf8
     $process = New-Object Diagnostics.Process
     $process.StartInfo = $info
-    if (-not $process.Start()) { throw 'Unable to start Codex.' }
-    # Windows PowerShell 5.1 lacks ProcessStartInfo.StandardInputEncoding.
-    # Wrap the stdin pipe explicitly, so Chinese is always sent as UTF-8.
-    $writer = [IO.StreamWriter]::new($process.StandardInput.BaseStream, $script:Utf8)
-    $writer.AutoFlush = $true
+    # .NET Framework creates and auto-flushes its stdin writer during Start().
+    # If Console.InputEncoding has a BOM, that preamble is sent before our first
+    # JSON request. Configure BOM-free UTF-8 before Start, then restore the caller.
+    # PowerShell 5.1 has no ProcessStartInfo.StandardInputEncoding property.
+    $savedInputEncoding = [Console]::InputEncoding
+    try {
+        [Console]::InputEncoding = $script:Utf8
+        if (-not $process.Start()) { throw 'Unable to start Codex.' }
+    } finally { [Console]::InputEncoding = $savedInputEncoding }
+    $writer = $process.StandardInput
     # Drain stderr immediately, so a full stderr pipe cannot block quota reads.
     $stderr = $process.StandardError.ReadToEndAsync()
     return @{ Process = $process; Stderr = $stderr; Input = $writer }

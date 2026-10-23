@@ -90,7 +90,14 @@ $originalProcess = (Get-Item Function:Start-CodexProcess).ScriptBlock
 function Start-CodexProcess([string]$Executable, [string[]]$Arguments) {
     & $originalProcess $fakeExecutable $Arguments
 }
-$snapshot = Get-AccountSnapshot 'unused'
+$savedTestInputEncoding = [Console]::InputEncoding
+try {
+    # Hosted Windows runners use UTF-8 with a BOM. Ensure no preamble leaks into
+    # the RPC pipe and that starting a child restores the caller's encoding.
+    [Console]::InputEncoding = New-Object Text.UTF8Encoding($true)
+    $snapshot = Get-AccountSnapshot 'unused'
+    Assert-Equal ([Console]::InputEncoding.GetPreamble().Length) 3 'Caller input encoding restored'
+} finally { [Console]::InputEncoding = $savedTestInputEncoding }
 Assert-Equal $snapshot.Bucket.primary.windowDurationMins 300 'Select Codex bucket'
 Assert-Equal $snapshot.Bucket.primary.usedPercent 0 'RPC quota value'
 Assert-Equal $snapshot.AccountKey.Length 64 'Identity hashed'
