@@ -1,0 +1,16 @@
+services:
+  quota-hello:
+    build:
+      context: .
+      args:
+        CODEX_VERSION: ${CODEX_VERSION:-0.163.0}
+    restart: unless-stopped
+    init: true
+    volumes:
+      - codex-auth:/home/node/.codex
+      - quota-data:/data
+    stop_grace_period: 180s
+
+volumes:
+  codex-auth:
+  quota-data:

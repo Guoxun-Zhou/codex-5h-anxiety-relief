@@ -1,0 +1,26 @@
+# Runtime state and credentials must stay local.
+.codex/
+auth.json
+settings.json
+state-*.json
+running.lock
+empty-workspace/
+*.log
+*.log.*
+.env
+.env.*
+*.pem
+*.key
+*.pfx
+# Build and development output.
+__pycache__/
+*.py[cod]
+*.exe
+*.tmp
+*.zip
+dist/
+work/
+test-results/
+.venv/
+.DS_Store
+Thumbs.db

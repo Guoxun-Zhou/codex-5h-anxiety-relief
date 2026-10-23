@@ -1,0 +1,53 @@
+name: Offline tests and Docker build
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  python:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python: ['3.10', '3.12']
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Offline Python tests (no credentials or real greetings)
+        run: python -m unittest discover -s tests -p "test_*.py" -v
+      - name: Package the source manifest
+        run: python scripts/build-release.py
+  windows-powershell:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Offline PowerShell regression checks
+        shell: powershell
+        run: .\tests\run-tests.ps1
+      - name: Validate publication manifest without publishing
+        shell: powershell
+        run: .\scripts\publish-to-github.ps1 -CheckOnly
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Shell syntax and Compose validation
+        run: |
+          bash -n setup.sh uninstall.sh
+          docker compose config --quiet
+      - name: Build image (no login and no greeting)
+        run: docker build --tag codex-quota-hello:ci .
+      - name: Check packaged entry points without authentication
+        run: |
+          docker run --rm codex-quota-hello:ci --version
+          docker run --rm codex-quota-hello:ci status
+          docker run --rm --entrypoint codex codex-quota-hello:ci exec --help
+          docker run --rm --entrypoint codex codex-quota-hello:ci exec --help | grep -q -- --ignore-user-config
+          docker run --rm --entrypoint codex codex-quota-hello:ci exec --help | grep -q -- --ephemeral
